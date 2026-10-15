@@ -1,0 +1,284 @@
+
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#15132b">
+<title>ห้ามพูด! — เกมคำบนหัว</title>
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#f6f4ff,#15132b);--surface:light-dark(#fff,#211e3d);--ink:light-dark(#201c3b,#fbf9ff);--muted:light-dark(#716d89,#b5b0d1);--line:light-dark(#e7e2fa,#3b365c);--purple:#8b5cf6;--pink:#f472b6;--lime:#c7f36b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,"Noto Sans Thai",sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0}
+.app{min-height:100dvh;padding:20px 16px 34px}
+.wrap{max-width:620px;margin:auto}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:18px}
+.logo{width:42px;height:42px;border-radius:15px;background:linear-gradient(135deg,var(--purple),var(--pink));display:grid;place-items:center;color:white;font-size:22px}
+.pill{border:1px solid var(--line);border-radius:99px;padding:8px 12px;color:var(--muted);font-size:12px;font-weight:700}
+.hero{text-align:center;padding:10px 0 18px}
+.eyebrow{display:inline-flex;color:#9b7aee;font-weight:900;font-size:12px;background:#302652;padding:7px 12px;border-radius:99px}
+.hero h1{font-size:clamp(30px,8vw,44px);line-height:1.12;margin:14px 0 8px}
+.hero h1 span{color:var(--purple)}
+.hero p{margin:0;color:var(--muted);font-size:14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:26px;padding:18px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px}
+.field label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0 7px 3px}
+.field select,.field input{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:13px;padding:12px;min-width:0}
+.wordcard{position:relative;overflow:hidden;text-align:center;border-radius:23px;min-height:255px;padding:22px 16px;background:linear-gradient(145deg,#8b5cf6,#6d4be8 55%,#d66bb5);color:white;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.wordcard:before,.wordcard:after{content:"";position:absolute;border:1px solid #ffffff30;border-radius:50%;width:190px;height:190px;right:-75px;top:-95px;pointer-events:none}
+.wordcard:after{width:130px;height:130px;right:auto;top:auto;left:-55px;bottom:-70px}
+.word-label{font-size:12px;font-weight:800;opacity:.8}
+.word{font-size:clamp(38px,10vw,58px);font-weight:1000;line-height:1.15;margin:17px 0 12px;word-break:break-word}
+.hint{font-size:13px;opacity:.85;min-height:20px}
+.reveal{margin-top:14px;background:#ffffff22;color:white;border:1px solid #ffffff66;border-radius:99px;padding:10px 16px;font-weight:800}
+.actions{display:grid;grid-template-columns:1fr 1.25fr;gap:10px;margin-top:12px}
+.btn{border-radius:15px;padding:14px 10px;font-weight:900;display:flex;justify-content:center;align-items:center;gap:8px}
+.btn-secondary{background:var(--bg);border:1px solid var(--line);color:var(--ink)}
+.btn-primary{background:var(--lime);color:#24213b}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:14px 0}
+.stat{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:12px 8px;text-align:center}
+.stat strong{display:block;font-size:23px}
+.stat small{color:var(--muted);font-size:11px;font-weight:800}
+.bottomgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.mini{border:1px solid var(--line);border-radius:17px;padding:14px;background:var(--surface)}
+.mini h3{font-size:13px;margin:0 0 5px}
+.mini p{font-size:11px;color:var(--muted);margin:0 0 12px;line-height:1.5}
+.mini button{background:#302652;color:#d4c5ff;padding:9px 10px;border-radius:11px;font-size:12px;font-weight:900;width:100%}
+.extra{display:none;margin-top:12px}
+.extra.open{display:block}
+.extra textarea{width:100%;min-height:100px;border:1px solid var(--line);border-radius:13px;background:var(--bg);color:var(--ink);padding:12px}
+.extra .row{display:flex;gap:8px;margin-top:8px}
+.extra .row button{flex:1}
+.note{text-align:center;color:var(--muted);font-size:11px;line-height:1.7;margin:18px 8px 0}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:99px;font-size:13px;font-weight:800;opacity:0;pointer-events:none;transition:.2s;z-index:10;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(min-width:560px){.app{padding-top:28px}.panel{padding:22px}.wordcard{min-height:285px}}
+@media(max-width:360px){.app{padding-left:10px;padding-right:10px}.panel{padding:12px}.controls{gap:7px}.field select{padding:10px 7px}.wordcard{min-height:230px}.btn{font-size:13px;padding:13px 7px}}
+</style>
+</head>
+<body>
+<main class="app">
+<div class="wrap">
+<header class="top">
+<div class="brand"><div class="logo">🙊</div><div>ห้ามพูด! <span style="color:var(--muted);font-weight:600;font-size:12px">WORD GAME</span></div></div>
+<div class="pill">🎉 เล่นกับเพื่อนได้</div>
+</header>
+
+<section class="hero">
+<div class="eyebrow">✦ PARTY GAME ✦</div>
+<h1>คำไหนนะ<br><span>ห้ามพูด!</span></h1>
+<p>สุ่มคำไว้บนหัว แล้วให้เพื่อนใบ้โดยห้ามพูดคำนั้น</p>
+</section>
+
+<section class="panel">
+<div class="controls">
+<div class="field"><label for="category">หมวดคำ</label>
+<select id="category">
+<option value="all">🎲 ทุกหมวด</option><option value="food">🍜 อาหาร</option><option value="animals">🐼 สัตว์</option><option value="places">🌍 สถานที่</option><option value="things">📦 สิ่งของ</option><option value="people">🧑‍🎤 คนดัง/อาชีพ</option><option value="actions">🏃 การกระทำ</option><option value="fun">🤣 คำชวนฮา</option><option value="anime">🎌 ตัวละครอนิเมะ</option><option value="custom">✨ คำของฉัน</option>
+</select></div>
+<div class="field"><label for="difficulty">ระดับความยาก</label>
+<select id="difficulty"><option value="all">🌟 ทุกระดับ</option><option value="easy">😊 ง่าย</option><option value="medium">😎 ปานกลาง</option><option value="hard">🔥 ยาก</option></select></div>
+</div>
+
+<div class="field" style="margin-bottom:12px"><label for="players">รายชื่อผู้เล่น (คั่นด้วยเครื่องหมายจุลภาค)</label><input id="players" value="ผู้เล่น 1, ผู้เล่น 2, ผู้เล่น 3" placeholder="เช่น เมย์, บอส, ฟ้า"></div>
+
+<div class="wordcard" aria-live="polite">
+<div class="word-label" id="wordLabel">คำต้องห้ามประจำเกม</div>
+<div class="word" id="word">กล้วย</div>
+<div class="hint" id="hint">ผู้เล่นคนแรกพยายามห้ามตัวเองพูดคำนี้ 🤫</div>
+<button class="reveal" id="reveal">🙈 ซ่อน/แสดงคำ</button>
+</div>
+
+<div class="actions"><button class="btn btn-secondary" id="pass">⏭️ รอดแล้ว ส่งคนต่อไป</button><button class="btn btn-primary" id="said">😱 เผลอพูดคำนี้!</button></div>
+<div class="actions"><button class="btn btn-secondary" id="newWord">🎲 เริ่มคำใหม่</button><button class="btn btn-primary" id="guess">🧠 ทายคำ + คะแนน</button></div>
+
+<div class="stats">
+<div class="stat"><strong id="count">0</strong><small>รอบที่ผ่าน</small></div>
+<div class="stat"><strong id="round">1</strong><small>คนที่กำลังเล่น</small></div>
+<div class="stat"><strong id="timer">30</strong><small>วินาที</small></div>
+</div>
+<div id="scoreboard" style="margin:8px 0 14px;padding:12px;border:1px solid var(--line);border-radius:15px;background:var(--bg);font-size:13px;line-height:1.9"></div>
+<div class="actions"><button class="btn btn-secondary" id="timerBtn">⏱️ เริ่มจับเวลา 30 วิ</button><button class="btn btn-primary" id="share">🔗 แชร์ให้เพื่อน</button></div>
+</section>
+
+<div class="bottomgrid">
+<div class="mini"><h3>✨ เพิ่มคำเอง</h3><p>ใส่คำเฉพาะกลุ่มเพื่อนของคุณ</p><button id="customToggle">เพิ่มคำของฉัน ＋</button></div>
+<div class="mini"><h3>📜 วิธีเล่น</h3><p>ให้เพื่อนใบ้คำ ห้ามพูดคำนั้นตรง ๆ</p><button id="rules">ดูวิธีเล่น</button></div>
+</div>
+
+<div class="extra" id="customBox"><section class="panel" style="margin-top:10px">
+<div class="field"><label for="customWords">คำที่ต้องการเพิ่ม (หนึ่งคำต่อบรรทัด)</label><textarea id="customWords" placeholder="เช่น&#10;อาจารย์ประจำวิชา&#10;ร้านชานมหน้ามอ&#10;เพื่อนตัวแสบ"></textarea></div>
+<div class="actions"><button class="btn btn-secondary" id="clearCustom">ล้างช่อง</button><button class="btn btn-primary" id="saveCustom">บันทึกคำ</button></div>
+<p style="color:var(--muted);font-size:11px">คำที่เพิ่มจะถูกเก็บไว้ในอุปกรณ์เครื่องนี้</p>
+</section></div>
+
+<p class="note">💜 กติกา: คนอื่นพยายามล่อให้ผู้เล่นพูดคำต้องห้าม หากครบเวลาแล้วยังไม่พูด ให้ส่งคนถัดไปโดยใช้คำเดิม<br>ทายคำต้องห้ามถูกได้ 1 คะแนน คนแรกที่ถึง 10 คะแนนชนะและเริ่มเกมใหม่<br>แชร์ลิงก์เพื่อให้ทุกคนเปิดเว็บได้ แต่คะแนนจะอยู่ในเครื่องที่ใช้เล่นร่วมกัน</p>
+</div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const words={
+food:[['ข้าวเหนียวมะม่วง','easy'],['ส้มตำ','easy'],['ชานมไข่มุก','easy'],['หมูกระทะ','easy'],['ทุเรียน','easy'],['ต้มยำกุ้ง','medium'],['ข้าวมันไก่','easy'],['พิซซ่า','easy'],['ซูชิ','easy'],['ขนมครก','medium'],['น้ำพริกกะปิ','hard'],['ครัวซองต์','medium'],['ผัดไทย','easy'],['ไอศกรีม','easy'],['ข้าวซอย','medium'],['บิงซู','medium']],
+animals:[['แมว','easy'],['ช้าง','easy'],['เพนกวิน','easy'],['ยีราฟ','easy'],['ปลาหมึก','medium'],['ตัวเงินตัวทอง','medium'],['คาปิบารา','medium'],['ตุ๊กแก','easy'],['เม่น','easy'],['อัลปากา','medium'],['ตุ่นปากเป็ด','hard'],['แมงกะพรุน','medium']],
+places:[['ทะเล','easy'],['โรงพยาบาล','easy'],['สนามบิน','easy'],['ห้องสมุด','easy'],['ตลาดนัด','easy'],['หอพัก','easy'],['สวนสนุก','easy'],['ห้องน้ำปั๊ม','medium'],['หอไอเฟล','medium'],['ขั้วโลกเหนือ','hard'],['ร้านสะดวกซื้อ','easy'],['มหาวิทยาลัย','easy']],
+things:[['โทรศัพท์','easy'],['พัดลม','easy'],['หมอน','easy'],['แปรงสีฟัน','easy'],['ร่ม','easy'],['เครื่องซักผ้า','medium'],['รีโมตทีวี','easy'],['ปลั๊กพ่วง','medium'],['ไม้จิ้มฟัน','easy'],['เครื่องปิ้งขนมปัง','hard'],['หม้อหุงข้าว','easy'],['หูฟัง','easy']],
+people:[['หมอ','easy'],['นักบิน','easy'],['นักร้อง','easy'],['แม่ค้า','easy'],['นักมายากล','medium'],['กรรมการ','easy'],['อินฟลูเอนเซอร์','medium'],['นักสืบ','easy'],['นักดับเพลิง','easy'],['นักพากย์','medium'],['นักบินอวกาศ','medium'],['เชฟ','easy']],
+actions:[['เต้น','easy'],['แอบหลับ','easy'],['ร้องไห้','easy'],['แปรงฟัน','easy'],['วิ่งหนี','easy'],['จีบคน','medium'],['แกล้งป่วย','medium'],['เดินแบบ','easy'],['สะดุดขาตัวเอง','medium'],['ร้องคาราโอเกะ','easy'],['ทำเป็นไม่รู้','medium'],['หัวเราะจนท้องแข็ง','hard']],
+fun:[['คนคุยเก่า','medium'],['เงินหมดก่อนสิ้นเดือน','hard'],['อ่านข้อความไม่ตอบ','medium'],['ตื่นสายวันสอบ','medium'],['เน็ตหลุดตอนเกมจะชนะ','hard'],['เพื่อนที่ชอบยืมเงิน','medium'],['แม่เรียกตอนกำลังเล่นเกม','easy'],['แอบกินขนมตอนดึก','easy'],['ส่งสติกเกอร์ผิดกลุ่ม','hard'],['ทำงานกลุ่มคนเดียว','medium'],['โดนเรียกตอบทั้งที่ไม่ฟัง','hard'],['บอกว่าอีก 5 นาทีถึง','medium']],
+anime:[['นารูโตะ','easy'],['ซาสึเกะ','easy'],['ซากุระ ฮารุโนะ','medium'],['โกคู','easy'],['เบจิต้า','medium'],['ลูฟี่','easy'],['โซโร','easy'],['ซันจิ','medium'],['ทันจิโร่','easy'],['เนซึโกะ','easy'],['เซนอิตสึ','medium'],['อิโนะสุเกะ','medium'],['โกโจ ซาโตรุ','easy'],['อิตาโดริ ยูจิ','medium'],['คิลัว','medium'],['กอน ฟรีคส์','medium'],['เอเรน เยเกอร์','medium'],['มิคาสะ','medium'],['เลวี แอคเคอร์แมน','hard'],['ไลท์ ยางามิ','medium'],['แอล (L)','easy'],['เซเลอร์มูน','easy'],['อุซางิ','medium'],['อาเนีย ฟอร์เจอร์','easy'],['ลอยด์ ฟอร์เจอร์','medium'],['ยอร์ ฟอร์เจอร์','medium'],['คิริโตะ','medium'],['อาสึนะ','medium'],['โทโดโรกิ','medium'],['เดกุ','easy'],['คัตสึกิ บาคุโก','hard'],['ชินจัง','easy'],['โดราเอมอน','easy'],['โคนัน','easy'],['ฮัตโตริ เฮย์จิ','hard'],['อินุยาฉะ','medium'],['คาเงยามะ โทบิโอะ','hard'],['ฮินาตะ โชโย','medium'],['ซากาตะ กินโทกิ','hard'],['รีไวล์','medium']]
+};
+
+let custom=[],currentWord='',seen=new Set(),completed=0,playerIndex=0,seconds=30,interval=null,hidden=true,players=[],scores={};
+const $=id=>document.getElementById(id);
+
+function loadPlayers(){
+players=$('players').value.split(',').map(x=>x.trim()).filter(Boolean);
+if(!players.length)players=['ผู้เล่น 1','ผู้เล่น 2'];
+scores=Object.fromEntries(players.map(p=>[p,0]));
+playerIndex=0;renderScores();
+}
+
+function pool(){
+let cat=$('category').value,diff=$('difficulty').value;
+let arr=cat==='all'?Object.values(words).flat():cat==='custom'?custom.map(w=>[w,'medium']):(words[cat]||[]).slice();
+if(cat!=='custom')arr=arr.concat(custom.map(w=>[w,'medium']));
+if(diff!=='all')arr=arr.filter(w=>w[1]===diff);
+return arr;
+}
+
+function draw(){
+let arr=pool();
+if(!arr.length){
+currentWord='';$('word').textContent='ยังไม่มีคำ';
+$('hint').textContent='ลองเปลี่ยนหมวดหรือเพิ่มคำเอง';return;
+}
+let available=arr.filter(w=>!seen.has(w[0]));
+if(!available.length){seen.clear();available=arr;}
+currentWord=available[Math.floor(Math.random()*available.length)][0];
+seen.add(currentWord);hidden=true;completed=0;
+$('word').textContent='🙈 คำลับ';
+$('wordLabel').textContent='คำต้องห้ามประจำเกม';
+$('hint').textContent='คนอื่นพยายามล่อให้ '+players[playerIndex]+' พูดคำนี้';
+$('reveal').textContent='👁️ แสดง/ซ่อนคำ';
+$('count').textContent=completed;
+$('round').textContent=players[playerIndex]||'ผู้เล่น';
+resetTimer();renderScores();
+}
+
+function showWord(){
+hidden=!hidden;
+$('word').textContent=hidden?'🙈 คำลับ':currentWord;
+$('hint').textContent=hidden?'ให้ผู้เล่นคนอื่นดูคำนี้ ห้ามเจ้าตัวเห็น':'แสดงคำให้คนใบ้ดูเท่านั้น อย่าให้ผู้เล่นเป้าหมายเห็น';
+}
+
+function resetTimer(){
+if(interval){clearInterval(interval);interval=null;}
+seconds=30;$('timer').textContent=seconds;
+$('timerBtn').textContent='⏱️ เริ่มจับเวลา 30 วิ';
+}
+
+function renderScores(){
+if(!$('scoreboard'))return;
+$('scoreboard').innerHTML='<b>🏆 คะแนนผู้เล่น (ทายถูก +1)</b><br>'+
+players.map((p,i)=>`${i===playerIndex?'👉 ':''}${escapeHtml(p)}: <b>${scores[p]||0}</b>/10`).join('　 ·　 ');
+}
+
+function escapeHtml(s){
+return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function toast(msg){
+$('toast').textContent=msg;$('toast').classList.add('show');
+clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('show'),2300);
+}
+
+function nextPlayer(){
+resetTimer();playerIndex=(playerIndex+1)%players.length;
+$('round').textContent=players[playerIndex];
+$('hint').textContent='คำเดิมยังอยู่! รอบนี้พยายามห้าม '+players[playerIndex]+' พูดออกมา';
+hidden=true;$('word').textContent='🙈 คำลับ';
+$('count').textContent=completed;renderScores();
+toast('เปลี่ยนเป็น '+players[playerIndex]+' — ใช้คำเดิม!');
+}
+
+function newGame(){
+players.forEach(p=>scores[p]=0);playerIndex=0;seen.clear();
+completed=0;resetTimer();draw();toast('เริ่มเกมใหม่แล้ว! 🎉');
+}
+
+$('newWord').onclick=()=>{draw();toast('สุ่มคำใหม่แล้ว');};
+$('reveal').onclick=showWord;
+$('pass').onclick=()=>{completed++;$('count').textContent=completed;nextPlayer();};
+$('said').onclick=()=>{toast('พูดคำต้องห้ามแล้ว! เปลี่ยนผู้เล่น แต่ยังใช้คำเดิม');nextPlayer();};
+
+$('guess').onclick=()=>{
+let guess=prompt('ผู้เล่น '+players[playerIndex]+' คิดว่าคำต้องห้ามคืออะไร?');
+if(guess===null)return;
+if(guess.trim().toLowerCase()===currentWord.trim().toLowerCase()){
+scores[players[playerIndex]]=(scores[players[playerIndex]]||0)+1;
+renderScores();
+if(scores[players[playerIndex]]>=10){
+alert('🎉 '+players[playerIndex]+' ได้ 10 คะแนนและชนะเกม!');
+newGame();
+}else{
+toast('ทายถูก! '+players[playerIndex]+' ได้ 1 คะแนน 🎉');nextPlayer();
+}
+}else{
+toast('ยังไม่ถูก! คำเดิมยังอยู่ ลองคนถัดไป');nextPlayer();
+}
+};
+
+$('category').onchange=()=>{seen.clear();draw();};
+$('difficulty').onchange=()=>{seen.clear();draw();};
+$('players').onchange=()=>{loadPlayers();draw();};
+
+$('timerBtn').onclick=()=>{
+if(interval){
+clearInterval(interval);interval=null;
+$('timerBtn').textContent='⏱️ เริ่มจับเวลา 30 วิ';return;
+}
+if(!players.length)loadPlayers();
+$('timerBtn').textContent='⏸️ หยุดเวลา';
+interval=setInterval(()=>{
+seconds--;$('timer').textContent=seconds;
+if(seconds<=0){
+clearInterval(interval);interval=null;
+$('timerBtn').textContent='⏱️ เริ่มจับเวลา 30 วิ';
+toast('หมดเวลา! ส่งคนต่อไป โดยไม่เปลี่ยนคำ');
+nextPlayer();
+}
+},1000);
+};
+
+$('share').onclick=async()=>{
+let url=location.href;
+if(!/^https?:/.test(url)){toast('นำไฟล์ขึ้น GitHub Pages ก่อน แล้วจึงแชร์ลิงก์ได้');return;}
+try{
+if(navigator.share)await navigator.share({title:'ห้ามพูด! — เกมคำบนหัว',text:'มาเล่นเกมห้ามพูดคำต้องห้ามกัน!',url});
+else{await navigator.clipboard.writeText(url);toast('คัดลอกลิงก์แล้ว!');}
+}catch(e){if(e.name!=='AbortError')toast('แชร์ไม่สำเร็จ ลองคัดลอกลิงก์จากเบราว์เซอร์');}
+};
+
+$('customToggle').onclick=()=>{
+$('customBox').classList.toggle('open');
+if($('customBox').classList.contains('open'))$('customWords').focus();
+};
+$('saveCustom').onclick=()=>{
+custom=[...new Set($('customWords').value.split(/\n|,/).map(s=>s.trim()).filter(Boolean))];
+try{localStorage.setItem('headword-custom',JSON.stringify(custom));}catch(e){}
+toast('บันทึก '+custom.length+' คำในเครื่องนี้แล้ว');
+if($('category').value==='custom')draw();
+};
+$('clearCustom').onclick=()=>$('customWords').value='';
+$('rules').onclick=()=>alert('วิธีเล่น\n1. เลือกคำต้องห้าม แล้วให้ทุกคนที่เหลือดูคำ แต่ผู้เล่นเป้าหมายห้ามเห็น\n2. เริ่มจับเวลา 30 วินาที ทุกคนพยายามล่อให้ผู้เล่นเป้าหมายพูดคำนั้น\n3. ถ้าหมดเวลาแล้วยังไม่พูด ให้ส่งคนถัดไป โดยใช้คำเดิม\n4. กด “ทายคำ + คะแนน” เพื่อทายคำที่เป็นคำต้องห้าม ทายถูกได้ 1 คะแนน\n5. คนแรกที่ถึง 10 คะแนนชนะ แล้วเริ่มเกมใหม่');
+
+try{custom=JSON.parse(localStorage.getItem('headword-custom')||'[]');}catch(e){}
+loadPlayers();draw();
+</script>
+</body>
+                       </html>
+                       
