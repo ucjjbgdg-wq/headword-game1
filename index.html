@@ -3,169 +3,299 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ห้ามพูด! เกมคำต้องห้าม</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ห้ามพูด! - Forbidden Word Game</title>
 <style>
-*{box-sizing:border-box}
-body{
- margin:0;padding:18px;background:#101426;color:#fff;
- font-family:system-ui,sans-serif;text-align:center
+:root {
+  --bg:#0b1020; --panel:#151d32; --line:#293550;
+  --text:#f4f6ff; --muted:#aab5ce; --purple:#9b87ff;
+  --red:#ff6377; --green:#4de0ae; --yellow:#ffd166;
 }
-main{max-width:650px;margin:auto}
-h1{font-size:38px;margin:10px}
-p{color:#bac4df}
-.card{
- background:#1b2340;padding:20px;border-radius:20px;
- margin:15px 0;border:1px solid #35405e
+* {box-sizing:border-box}
+body {
+  margin:0; background:radial-gradient(circle at top,#20264b,var(--bg) 48%);
+  color:var(--text); font-family:system-ui,-apple-system,sans-serif;
+  min-height:100vh; padding:20px 12px 40px;
 }
-button{
- border:0;border-radius:12px;padding:13px 10px;
- font-size:15px;font-weight:bold;cursor:pointer
+.container {max-width:900px;margin:auto}
+header{text-align:center;padding:18px 8px 22px}
+.logo {font-size:48px}
+h1 {font-size:clamp(28px,6vw,42px);margin:4px 0}
+.subtitle {color:var(--muted);font-size:14px}
+.panel,.player {
+  background:rgba(21,29,50,.96);border:1px solid var(--line);
+  border-radius:20px;padding:18px;margin-bottom:16px;
 }
-button:disabled{opacity:.4}
-.players{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.player{background:#303a59;color:white}
-.player.active{background:#a78bfa;color:#171126}
-.primary{background:#a78bfa;color:#171126}
-.soft{background:#303a59;color:white}
-.red{background:#9e2946;color:white}
-.green{background:#087d61;color:white}
-.buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.word{font-size:clamp(35px,10vw,58px);font-weight:900;margin:20px 0;overflow-wrap:anywhere}
-.timer{font-size:clamp(60px,17vw,90px);font-weight:900;font-variant-numeric:tabular-nums}
-.small{font-size:13px;color:#bac4df}
-.status{min-height:28px;color:#d8d4ff}
-.result{font-size:21px;font-weight:bold}
+h2 {font-size:18px;margin:0 0 14px}
+label {display:block;color:var(--muted);font-size:13px;margin-bottom:8px}
+select,button {
+  font:inherit;border:0;border-radius:12px;padding:12px;
+}
+select {
+  width:100%;background:#0d1427;color:white;border:1px solid var(--line);
+}
+button {cursor:pointer;font-weight:700;transition:.15s}
+button:active {transform:scale(.97)}
+button:disabled {opacity:.4;cursor:not-allowed}
+.primary {background:var(--purple);color:#100c28}
+.secondary {background:#27324c;color:white}
+.danger {background:#642638;color:#ffe3e8}
+.success {background:#174d43;color:#b9ffeb}
+.warning {background:#58451b;color:#ffedb1}
+.row {display:flex;gap:8px;flex-wrap:wrap}
+.row button {flex:1;min-width:105px}
+.players {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.player {margin:0;min-width:0}
+.player h2 {display:flex;justify-content:space-between;align-items:center}
+.badge {font-size:11px;padding:5px 8px;border-radius:20px;background:#293550;color:#d9e1ff}
+.word {
+  background:#0b1225;border:1px dashed #505b80;border-radius:16px;
+  padding:18px 8px;text-align:center;margin:12px 0;
+}
+.word small {color:var(--muted);display:block;font-size:12px}
+.word strong {font-size:clamp(25px,6vw,36px);display:block;margin-top:8px;overflow-wrap:anywhere}
+.hidden-word {filter:blur(7px);user-select:none}
+.clock {font-size:35px;font-weight:850;text-align:center;font-variant-numeric:tabular-nums;margin:10px 0}
+.status {text-align:center;font-size:13px;color:var(--muted);min-height:22px;margin-bottom:12px}
+.player .row button {font-size:13px;padding:11px 6px}
+.note {color:var(--muted);font-size:13px;line-height:1.7}
+footer{text-align:center;color:#7683a3;font-size:12px;padding:16px}
+#message {display:none;margin-bottom:16px;padding:14px;border-radius:14px;background:#27324c}
+@media(max-width:560px) {
+  body{padding:12px 10px 30px}
+  .players{grid-template-columns:1fr}
+  .panel,.player{padding:15px}
+  .logo{font-size:40px}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>🤐 ห้ามพูด!</h1>
-<p>อย่าหลุดพูดคำต้องห้ามให้ได้ 5 นาที</p>
+<div class="container">
+  <header>
+    <div class="logo">🤐🎮</div>
+    <h1>ห้ามพูด!</h1>
+    <div class="subtitle">FORBIDDEN WORD · เกมวัดใจในหมู่เพื่อน</div>
+  </header>
 
-<section class="card">
-<h3>① เลือกผู้เล่น</h3>
-<div class="players">
-<button class="player active" data-p="1">คนที่ 1</button>
-<button class="player" data-p="2">คนที่ 2</button>
-<button class="player" data-p="3">คนที่ 3</button>
-<button class="player" data-p="4">คนที่ 4</button>
-</div>
-<hr style="border-color:#35405e;margin:20px 0">
-<p id="owner">คำต้องห้ามของคนที่ 1</p>
-<div class="word" id="word">••••••</div>
-<p class="small" id="hint">ให้เจ้าของคำดูคนเดียว</p>
-<div class="buttons">
-<button class="primary" id="reveal">👁 แสดงคำ</button>
-<button class="soft" id="newword">🔀 สุ่มคำใหม่</button>
-</div>
-</section>
+  <section class="panel">
+    <h2>⚙️ ตั้งค่าเกม</h2>
+    <label for="playerCount">จำนวนผู้เล่น</label>
+    <select id="playerCount">
+      <option value="2">2 คน</option>
+      <option value="3">3 คน</option>
+      <option value="4" selected>4 คน</option>
+    </select>
+    <div style="height:12px"></div>
+    <label for="wordMode">รูปแบบคำต้องห้าม</label>
+    <select id="wordMode">
+      <option value="all">รวมทุกหมวด — แนะนำ</option>
+      <option value="daily">คำพูดติดปาก</option>
+      <option value="gaming">คำเกมและการ์ดเกม</option>
+      <option value="friends">คำแซวเพื่อนและคำสบถ</option>
+      <option value="slang">ศัพท์วัยรุ่น</option>
+    </select>
+    <div style="height:14px"></div>
+    <div class="row">
+      <button class="primary" id="newGame">🎲 เริ่มเกมใหม่ / สุ่มคำใหม่</button>
+    </div>
+    <p class="note">กติกา: ดูคำของตัวเองแล้วพยายามไม่พูดคำนั้นให้ครบ 5 นาที ถ้าหลุดให้กด “พูดแล้ว!” และรับโทษ 5 นาที ไม่มีระบบคะแนน</p>
+  </section>
 
-<section class="card">
-<h3>② จับเวลา</h3>
-<div class="timer" id="timer">05:00</div>
-<p class="status" id="status">พร้อมเริ่มเกม</p>
-<div class="buttons">
-<button class="primary" id="start">▶ เริ่ม</button>
-<button class="soft" id="pause" disabled>⏸ หยุดชั่วคราว</button>
-<button class="red" id="lose" disabled>💥 พูดคำต้องห้าม</button>
-<button class="green" id="win" disabled>🏆 รอดครบเวลา</button>
-<button class="soft" id="reset" style="grid-column:1/-1">↻ เริ่มใหม่ 5 นาที</button>
-</div>
-<div class="result" id="result"></div>
-</section>
+  <div id="message"></div>
+  <div id="players" class="players"></div>
 
-<section class="card" style="text-align:left;line-height:1.9">
-<h3>วิธีเล่น</h3>
-1. เลือกหมายเลขผู้เล่นและแสดงคำให้เจ้าของคำดู<br>
-2. พยายามล่อให้คนอื่นพูดคำต้องห้ามของตัวเอง<br>
-3. หากพูดคำต้องห้าม ให้กดปุ่มแพ้และจับเวลาโทษ 5 นาที<br>
-4. หากรอดครบ 5 นาที ให้กดปุ่มรอดครบเวลา<br>
-5. ไม่มีคะแนนในเว็บ ให้นับกันเอง
-</section>
-<p class="small">เว็บนี้ไม่ตรวจจับเสียงพูดอัตโนมัติ</p>
-</main>
+  <footer>เล่นกับเพื่อนอย่างสนุก · ผู้เล่นเป็นผู้ตัดสินว่าพูดคำต้องห้ามหรือไม่</footer>
+</div>
 
 <script>
-const wordText = `
-เออ|อือ|อืม|อ้าว|อ๋อ|อุ๊ย|โอ๊ย|เฮ้ย|โห|ว้าว|ห๊ะ|หา|หือ|เอ๊ะ|เอ้า|อะไร|อะไรนะ|ทำไม|ใคร|ที่ไหน|เมื่อไหร่|ยังไง|เท่าไหร่|กี่โมง|ใช่|ไม่|ไม่ใช่|จริง|จริงดิ|จริงเหรอ|แน่ใจ|ได้|ไม่ได้|โอเค|ตกลง|ก็ได้|มั้ง|ขอบคุณ|ขอบใจ|ขอโทษ|ไม่เป็นไร|สวัสดี|หวัดดี|บาย|ฝันดี|เดี๋ยว|เดี๋ยวก่อน|แป๊บ|รอก่อน|ตอนนี้|เมื่อกี้|เมื่อวาน|พรุ่งนี้|วันนี้|คืนนี้|หิว|หิวน้ำ|หิวข้าว|อิ่ม|อร่อย|เผ็ด|หวาน|เค็ม|เปรี้ยว|ขม|ร้อน|เย็น|น้ำ|ข้าว|ขนม|กาแฟ|ชา|นม|กินข้าว|กินยัง|กินอะไร|กินไหม|เอาไหม|เอาอีก|พอแล้ว|หมดแล้ว|ขอชิม|ขอหน่อย|แพง|ถูก|เงิน|ตังค์|โอน|จ่าย|หารกัน|ไม่มีตังค์|ฟรี|เหนื่อย|ง่วง|นอน|ขี้เกียจ|เบื่อ|เซ็ง|เครียด|ดีใจ|เสียใจ|ตกใจ|กลัว|เขิน|อาย|คิดถึง|รัก|ชอบ|ไม่ชอบ|เกลียด|ร้องไห้|หัวเราะ|ขำ|ตลก|ฮา|ล้อเล่น|น่ารัก|หล่อ|สวย|มาก|น้อย|เยอะ|สุดยอด|แบบว่า|ก็คือ|แบบนี้|แบบนั้น|เอาจริง|เอาจริงดิ|พูดจริง|พูดมา|บอกมา|ฟังนะ|ดูดิ|นี่ไง|เห็นไหม|รู้ไหม|รู้แล้ว|ไม่รู้|ไม่แน่ใจ|เข้าใจ|ไม่เข้าใจ|พูดอีกที|อะไรของแก|ถามจริง|ขอถาม|เรียน|สอบ|การบ้าน|งานกลุ่ม|รายงาน|โปรเจกต์|อาจารย์|ครู|นักเรียน|นักศึกษา|ห้องเรียน|คะแนน|เกรด|อ่านหนังสือ|ส่งงาน|เสร็จยัง|เสร็จแล้ว|ยังไม่เสร็จ|ทำไม่ทัน|ช่วยหน่อย|ไฟล์|โค้ด|บั๊ก|คอม|มือถือ|โทรศัพท์|แบตหมด|ชาร์จ|หูฟัง|เน็ต|ไวไฟ|โทรมา|โทรกลับ|ข้อความ|แชต|ทักมา|ตอบแชต|ออนไลน์|ไลฟ์|โพสต์|แชร์|คอมเมนต์|กดไลก์|ติดตาม|สตอรี่|คลิป|วิดีโอ|รูป|ถ่ายรูป|เกม|เล่นเกม|ชนะ|แพ้|โกง|ดวงดี|ดวงซวย|หัวร้อน|เกือบแล้ว|อีกนิด|เริ่มใหม่|จริงปะ|เอาดี|ไม่เอา|เอา|แล้วแต่|ช่างมัน|หยุดเลย|อย่าดิ|ไม่ไหว|ไหวไหม|มาแล้ว|ไปแล้ว|ไปไหน|กลับบ้าน|ถึงยัง|ถึงแล้ว|รถติด|ฝนตก|แดดออก|อากาศร้อน|หนาว|เปียก|ร่ม|บ้าน|ห้อง|ห้องน้ำ|ห้องนอน|ประตู|หน้าต่าง|กุญแจ|ไฟดับ|เปิดไฟ|ปิดไฟ|แอร์|พัดลม|แม่|พ่อ|พี่|น้อง|เพื่อน|แฟน|คนคุย|ครอบครัว|หมา|แมว|ปลา|นก|กระต่าย|ผี|น่ากลัว|ขนลุก|มืด|เสียงอะไร|ใครอยู่|ระวัง|หนึ่ง|สอง|สาม|สี่|ห้า|หก|เจ็ด|แปด|เก้า|สิบ|เช้า|สาย|เที่ยง|บ่าย|เย็น|ดึก|วันหยุด|นาที|ชั่วโมง|วินาที|นาน|เร็ว|ช้า|ทัน|ไม่ทัน|รีบ|สีแดง|สีฟ้า|สีเขียว|สีเหลือง|สีชมพู|สีดำ|สีขาว|ใหญ่|เล็ก|สูง|เตี้ย|ใหม่|เก่า|หาย|เจอแล้ว|หาไม่เจอ|อยู่ไหน|พัง|แตก|ปวดหัว|ปวดท้อง|ไม่สบาย|เป็นไข้|ยา|หมอ|พักก่อน|เดิน|วิ่ง|นั่ง|ยืน|ยิ้ม|ร้องเพลง|เต้น|พูด|เงียบ|หยุดพูด|ฟังอยู่|คำใบ้|เดา|เดาถูก|เดาผิด|คำตอบ|เฉลย|ห้ามพูด|คำต้องห้าม|หลุดปาก|แพ้แล้ว|รอดแล้ว|จับเวลา|เริ่มเกม|จบเกม|รอบนี้|รอบหน้า|สุ่มใหม่|อุ๊ต๊ะ|ว้าย|บ้าจริง|เว่อร์|เกินไป|สุดจัด|ปั่น|แกล้ง|หลอก|โกหก|จับได้|โป๊ะ|ความลับ|รู้ทัน|มีพิรุธ|ชัวร์|ไม่ชัด|ปกติ|แปลก|เหมือนกัน|ต่างกัน|ง่าย|ยาก|เก่งจัง|เริ่ด|ดีมาก|แย่มาก|เฉย ๆ|สนุก|ไม่สนุก|คุ้ม|เสียดาย|ซื้อไหม|ซื้อแล้ว|ขายไหม|มีไหม|ไม่มีแล้ว|ตลาด|ร้านค้า|เซเว่น|ห้าง|ร้านกาแฟ|หมูกระทะ|ชาบู|ส้มตำ|ก๋วยเตี๋ยว|ข้าวผัด|กะเพรา|ไข่เจียว|ไก่ทอด|พิซซ่า|เบอร์เกอร์|ขนมปัง|มาม่า|ไอศกรีม|เค้ก|ทุเรียน|มะม่วง|กล้วย|ฟุตบอล|บาสเกตบอล|กีฬา|ทีมเรา|กรรมการ|ยิงเข้า|ประตู|สนาม|เพลง|นักร้อง|คอนเสิร์ต|ซีรีส์|ละคร|หนัง|หนังผี|ตอนจบ|สปอยล์|ดูยัง|พระเอก|นางเอก|ข่าว|ดราม่า|กระแส|ไวรัล|เทรนด์|ดังมาก|ดารา|มีม|ประชุม|ทำงาน|เลิกงาน|หัวหน้า|เงินเดือน|โบนัส|ลาออก|สมัครงาน|ไมค์ปิด|ไมค์เปิด|ส่งอีเมล|เหนื่อยใจ|หมดแรง|หมดไฟ|ขอพัก|สบายดี|ไม่โอเค|เป็นไรไหม|ไม่มีอะไร|มีเรื่อง|อย่าบอกใคร|ห้ามบอก|ข่าวลือ|เชื่อไหม|ขอร้อง|ช่วยที|ขอเถอะ|หน่อยสิ|พอได้แล้ว|กลับมา|เชื่อแล้ว|ไม่เชื่อ|ไม่มีทาง|แน่เหรอ|ชัวร์ไหม|พูดยาก|ตอบยาก|โชคดี|โชคร้าย|เกือบไป|รอดตัว|พลาดแล้ว|หมดกัน|อีกครั้ง|ลองใหม่|ไม่ยอม
-`.split("|").map(x=>x.trim()).filter(Boolean);
+const WORDS = {
+daily: `
+เออ|อือ|อืม|อ้าว|อ๋อ|ใช่|ไม่|แบบ|คือ|ก็|แล้ว|อะ|อ่ะ|นะ|เนอะ|จริง|เหรอ|หรอ|โอเค|เดี๋ยว|แป๊บ|แป๊บนึง|รอก่อน|อะไร|ทำไม|ยังไง|ไหน|ใคร|เมื่อไหร่|ที่ไหน|เท่าไหร่|ได้|ไม่ได้|ไม่รู้|รู้แล้ว|เข้าใจ|แน่นอน|จริงดิ|ใช่ไหม|ใช่ปะ|ถูก|ผิด|เอางี้|งั้น|แล้วไง|ก็ได้|ไม่เอา|เอาดิ|เออว่ะ|เออเนอะ|อ๋อเหรอ|อะไรนะ|ว่าไง|มีไร|เป็นไร|ทำไร|ไปไหน|กลับยัง|กินข้าวยัง|หิว|อิ่ม|ง่วง|เหนื่อย|ร้อน|หนาว|ปวดหัว|จริงปะ|จริงเหรอ|ประมาณนั้น|แบบว่า|คือว่า|นั่นแหละ|นั่นไง|เห็นไหม|บอกแล้ว|ก็บอกแล้ว|ก็จริง|เออจริง|ไม่จริง|ชัวร์|ไม่ชัวร์|เดี๋ยวก่อน|ก่อนนะ|ทีหลัง|แป๊ปเดียว|อีกนิด|พอแล้ว|พอเลย|หยุดก่อน|ใจเย็น|โอ้โห|โห|โอ๊ย|ห๊ะ|หา|อุ๊ย|เอ้า|เออเออ|อืมใช่|ก็ใช่|ก็ไม่|หรือเปล่า|หรือว่า|เพราะอะไร|ยังอะ|แล้วแต่|ตามนั้น|จัดไป|ได้เลย|ไม่มี|มี|หมดแล้ว|ยังไม่|แค่นี้|เท่านั้น|ทุกคน|จริงด้วย|ใช่เลย|ไม่ได้นะ|ได้ปะ|ได้ไหม|เอาไหม|เอาปะ
+`,
+gaming: `
+จั่ว|การ์ด|เด็ค|เทิร์น|ตา|ตานี้|ตาต่อไป|ลงเลย|ลงการ์ด|ตีเลย|โจมตี|ป้องกัน|คอมโบ|ดาเมจ|สกิล|เอฟเฟกต์|เลือด|มานา|บัฟ|เนิร์ฟ|เมต้า|แครี่|ซัพ|ฟาร์ม|แก๊ง|แรงค์|แรงก์|ไก่|แบก|ฟีด|แจก|โยนเกม|ตึง|ตึงจัด|โหด|โกง|แพ้แล้ว|ชนะแล้ว|ดวง|ดวงดี|ดวงแตก|ซวย|ซวยละ|โดนแล้ว|เอาคืน|แก้มือ|รีเกม|รีแมตช์|GG|GGWP|MVP|AFK|แลค|กระตุก|ค้าง|หลุด|บั๊ก|แฮก|ล็อบบี้|ปิง|เน็ต|คอม|เมาส์|คีย์บอร์ด|จอ|สกิน|สเปก|บอส|มอนสเตอร์|เลเวล|เวล|EXP|ฟูลทีม|โซโล่|แรงค์ตก|ต้นเกม|กลางเกม|เลทเกม|เปิดก่อน|สวนกลับ|สวนดิ|บล็อก|แก้ทาง|แผน|เล่นดี|เล่นพลาด|พลาดแล้ว|พังละ|เอาอีก|รอบหน้า|กดเลย|กดสกิล|อัลติ|คูลดาวน์|ดาเมจแรง|เลือดน้อย|เลือดหมด|แตกแล้ว|ตายแล้ว|ฟื้นก่อน|ชุบหน่อย|แคมป์|บวกดิ|บวกเลย|ถอยก่อน|ถอยดิ|ดันป้อม|ตีป้อม|ป้อมแตก|ยับ|ยับเลย|ไหล|แตก|แตกพ่าย|ปั่น|เมน|ตัวแบก|ตัวแจก|เกมตึง|เกมพลิก|จบเกม|ชนะขาด|แพ้ยับ|เล่นต่อ|พักก่อน|ออกเกม|เข้าเกม|เปิดไมค์|ปิดไมค์|เสียงมา|ได้ยินไหม|คอลหน่อย|บอกตำแหน่ง|มุมนี้|หลังบ้าน|ข้างหลัง|ข้างหน้า|ซ้าย|ขวา|กลาง|บน|ล่าง|เปลี่ยนแผน|เอาจริง|เอาแล้ว|จบละ|หมดแม็ก|รีโหลด|ยิง|ยิงดิ|ยิงเลย|เฮดช็อต|คริติคอล|คริ|หลบ|หลบก่อน|หลบไม่ทัน|สตัน|สโลว์|ฮีล|ฮีลหน่อย|ฟื้นเลือด|คิล|แอสซิสต์|สกอร์|แต้ม|ชนะรอบ|แพ้รอบ
+`,
+friends: `
+มึง|กู|แก|เรา|นาย|เพื่อน|ไอ้บ้า|ไอ้เหี้ย|ไอ้สัส|ไอ้เวร|ไอ้ห่า|ไอ้ควาย|ไอ้โง่|ไอ้นี่|ไอ้นั่น|ไอ้ตึง|ไอ้เก่ง|ไอ้หมา|ไอ้เวรเอ๊ย|เหี้ย|เชี่ย|สัส|แม่ง|ควย|ห่า|ชิบหาย|ฉิบหาย|เวร|เวรเอ๊ย|เชี่ยละ|ซวยละ|งานเข้า|แม่งเอ๊ย|บ้าเอ๊ย|อะไรวะ|ทำไรวะ|เป็นไรวะ|มึงดูนี่|เชื่อกู|กูว่าแล้ว|มึงเอาดีๆ|เอาจริงดิ|บ้าปะ|โง่ปะ|มั่วละ|พูดมาก|เงียบไป|หยุดเลย|พอๆ|พอเหอะ|อย่าดิ|อย่ามั่ว|เอาดิ|จัดมา|มาเลย|แน่จริง|เก่งนักเหรอ|แน่ใจนะ|เอาอีกละ|อีกละ|เอาแล้วไง|เห็นไหม|บอกแล้วไง|กูบอกแล้ว|มึงบ้าเหรอ|ไหวไหม|ไม่ไหวว่ะ|พังละ|โดนแน่|โดนแล้ว|เอาคืน|แก้มือ|โคตรเก่ง|โคตรกาก|กากจัด|ไก่จัด|ปากดี|ปากแจ๋ว|พูดไปเรื่อย|ขี้โม้|โม้จัด|เว่อร์|เว่อร์ไป|เอาดีๆ|เอาดีดิ|จริงดิ|จริงปะ|ว่ามา|พูดมา|บอกมา|มีปัญหาไหม|มาดิ|เอาสิ|จัดเลย|เอาเลย|ใครวะ|ตัวอะไร|อะไรของมึง|อะไรของแก|อย่าหาทำ|อย่าห้าว|อย่าซ่า|อย่าเก๋า|ใจเย็นก่อน|หยุดก่อน|รอก่อนดิ|มึงรอก่อน|กูไม่ไหว|กูยอม|ยอมแล้ว|พอแล้ว|จบๆ|จบข่าว|หมดสภาพ|สภาพ|โคตรปั่น|ปั่นจัด|ฮาจัด|ขำว่ะ|ขำไม่ไหว|ตายละ|ชิบเป๋ง|โคตรซวย|แม่งเอ๊ย|เชื่อกูดิ|มึงลองดู|ลองดิ|เอาไหม|กล้าปะ|กล้าดิ|ไม่กล้าเหรอ
+`,
+slang: `
+จึ้ง|เริ่ด|ทำถึง|อ่อม|ช็อตฟีล|ตัวตึง|ตัวแบก|ตัวมัม|ตัวพ่อ|ปัง|ฉ่ำ|ติดแกลม|มีม|ไวรัล|ทัวร์ลง|ป้ายยา|นอย|ฟีล|เดลูลู|NPC|เทสดี|เฟียส|โฮ่ง|ยับ|อย่างเอา|จบข่าว|จึ้งมาก|เริ่ดเกิน|เกินต้าน|เกินไปมาก|ปั่นจัด|ตึงเกิน|เท่จัด|โคตรเท่|แอบจึ้ง|ฟีลกู๊ด|ฟีลแฟน|ฟีลเพื่อน|ฟีลนั้น|หมดฟีล|ช็อต|ช็อตไปเลย|หล่อเท่|หล่อจัด|หลุดโลก|ของแทร่|ของจริง|ตัวจริง|จัดจ้าน|จานด่วน|อิหยังวะ|ปุ้บปั้บ|เอ็นดู|ขิต|ตุย|ตุยเย่|บ้ง|บ้งมาก|พส|จอย|จอยๆ|จอยเว่อร์|จึ้งใจ|แซ่บ|แซ่บเว่อร์|ปังไม่ไหว|อวยยศ|ป้ายยาแรง|งานดี|งานละเอียด|เทสผ่าน|เทสไม่ผ่าน|ดูทรง|ทรงดี|ทรงอย่างแบด|ฟอร์มดี|ฟอร์มตก|เล่นใหญ่|เว่อร์มาก|โคตรจึ้ง|ปั่นประสาท|มีของ|ของดี|โหดจัด|เกินเรื่อง|เรื่องใหญ่|เก็บทรง|เสียทรง|คุมโทน|จึ้งตาแตก|เต็มสิบ|สิบสิบสิบ|สุดจัด|สุดปัง|ชนะขาด|สับ|สับมาก|ฟาด|ฟาดมาก|เสิร์ฟ|ชีเสิร์ฟ|ทำถึงเกิน|แรงเกิน|ตึงมือ|ตึงเปรี๊ยะ|ฉ่ำวาว|นอยด์|เฟล|แอบเฟล|ว้าวุ่น|ว้าวุ่นเลย|ลั่น|ลั่นจัด|ฮาแตก|ขำแตก|มู้ด|มู้ดดี|มู้ดเสีย|จบละ|แยกย้าย|เอาเรื่อง|เอาอยู่|จึ้งไม่ไหว|ฟิน|ฟินจัด|ปั่นเก่ง|แอบตึง|โคตรจะตึง
+`
+};
 
-const words=[...new Set(wordText)];
-let player=1,word="",shown=false,remaining=300,tick=null,penalty=null,penaltyEnd=0;
-const $=id=>document.getElementById(id);
-function newWord(){
- const pool=words.filter(w=>w!==word);
- word=pool[Math.floor(Math.random()*pool.length)];
- shown=false;$("word").textContent="••••••";$("hint").textContent="ให้เจ้าของคำดูคนเดียว";
- $("reveal").textContent="👁 แสดงคำ";$("owner").textContent="คำต้องห้ามของคนที่ "+player;
+const $ = id => document.getElementById(id);
+const playersEl = $("players");
+const message = $("message");
+let players = [];
+let nextId = 0;
+let tickHandle = null;
+
+function getWordPool() {
+  const mode = $("wordMode").value;
+  const source = mode === "all"
+    ? Object.values(WORDS).join("|")
+    : WORDS[mode];
+  return [...new Set(source.split("|").map(w => w.trim()).filter(Boolean))];
 }
-function showTime(){
- $("timer").textContent=String(Math.floor(remaining/60)).padStart(2,"0")+":"+String(remaining%60).padStart(2,"0");
- $("timer").style.color=remaining<=30?"#fb7185":"white";
+
+function randomWord(exclude = []) {
+  const pool = getWordPool().filter(w => !exclude.includes(w));
+  const choices = pool.length ? pool : getWordPool();
+  return choices[Math.floor(Math.random() * choices.length)];
 }
-function stop(){if(tick){clearInterval(tick);tick=null;}}
-function start(){
- if(penalty)return;
- if(remaining<=0)remaining=300;
- stop();$("result").textContent="";$("status").textContent="กำลังจับเวลา...";
- $("start").disabled=true;$("pause").disabled=false;$("lose").disabled=false;$("win").disabled=false;
- tick=setInterval(()=>{
-  remaining--;showTime();
-  if(remaining<=0){
-   stop();$("start").disabled=false;$("pause").disabled=true;
-   $("status").textContent="หมดเวลาแล้ว";
-   $("result").textContent="⏰ ครบ 5 นาที! ยืนยันว่ารอดหรือไม่";
+
+function fmt(seconds) {
+  seconds = Math.max(0, seconds);
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+}
+
+function stopTicker() {
+  if (tickHandle) clearInterval(tickHandle);
+  tickHandle = null;
+}
+
+function startTicker() {
+  stopTicker();
+  tickHandle = setInterval(() => {
+    let active = false;
+    players.forEach(p => {
+      if (p.state === "playing" || p.state === "penalty") {
+        active = true;
+        p.remaining--;
+        if (p.remaining <= 0) {
+          p.remaining = 0;
+          if (p.state === "playing") {
+            p.state = "survived";
+          } else {
+            p.state = "ready";
+          }
+        }
+      }
+    });
+    renderPlayers();
+    if (!active) stopTicker();
+  }, 1000);
+}
+
+function startPlayer(id) {
+  const p = players.find(x => x.id === id);
+  if (!p || p.state === "playing" || p.state === "penalty") return;
+  p.state = "playing";
+  p.remaining = 300;
+  p.revealed = true;
+  startTicker();
+  renderPlayers();
+}
+
+function losePlayer(id) {
+  const p = players.find(x => x.id === id);
+  if (!p || p.state !== "playing") return;
+  p.state = "penalty";
+  p.remaining = 300;
+  startTicker();
+  renderPlayers();
+}
+
+function survivePlayer(id) {
+  const p = players.find(x => x.id === id);
+  if (!p || p.state !== "playing" || p.remaining > 0) return;
+  p.state = "survived";
+  renderPlayers();
+}
+
+function revealWord(id) {
+  const p = players.find(x => x.id === id);
+  if (p) {
+    p.revealed = !p.revealed;
+    renderPlayers();
   }
- },1000);
 }
-document.querySelectorAll(".player").forEach(b=>b.onclick=()=>{
- player=Number(b.dataset.p);
- document.querySelectorAll(".player").forEach(x=>x.classList.toggle("active",x===b));
- newWord();
+
+function resetPlayer(id) {
+  const p = players.find(x => x.id === id);
+  if (!p) return;
+  p.word = randomWord(players.filter(x => x.id !== id).map(x => x.word));
+  p.state = "ready";
+  p.remaining = 300;
+  p.revealed = false;
+  renderPlayers();
+}
+
+function renderPlayers() {
+  playersEl.innerHTML = "";
+  players.forEach(p => {
+    const isPlaying = p.state === "playing";
+    const isPenalty = p.state === "penalty";
+    let status = "พร้อมเล่น";
+    let statusColor = "";
+    if (isPlaying) { status = "กำลังเล่น"; statusColor = "color:var(--green)"; }
+    if (isPenalty) { status = "ติดโทษ"; statusColor = "color:var(--red)"; }
+    if (p.state === "survived") { status = "🎉 รอดครบ 5 นาที!"; statusColor = "color:var(--green)"; }
+    const clock = (isPlaying || isPenalty) ? fmt(p.remaining) :
+      (p.state === "survived" ? "รอดแล้ว" : "05:00");
+    const word = p.revealed ? p.word : "••••••";
+    const card = document.createElement("section");
+    card.className = "player";
+    card.innerHTML = `
+      <h2>👤 ผู้เล่น ${p.number} <span class="badge">${status}</span></h2>
+      <div class="word">
+        <small>คำต้องห้ามของคุณ</small>
+        <strong class="${p.revealed ? "" : "hidden-word"}">${word}</strong>
+      </div>
+      <div class="row">
+        <button class="secondary reveal">👁 ${p.revealed ? "ซ่อนคำ" : "ดูคำ"}</button>
+        <button class="secondary reroll">🎲 สุ่มคำใหม่</button>
+      </div>
+      <div class="clock">${clock}</div>
+      <div class="status" style="${statusColor}">${isPenalty ? "ลงโทษ: รอให้ครบ 5 นาที" : status}</div>
+      <div class="row">
+        <button class="primary start" ${isPlaying || isPenalty || p.state === "survived" ? "disabled" : ""}>▶ เริ่ม 5 นาที</button>
+        <button class="danger lose" ${!isPlaying ? "disabled" : ""}>🤐 พูดแล้ว!</button>
+      </div>
+      <div style="height:8px"></div>
+      <div class="row">
+        <button class="success survived" ${!(isPlaying && p.remaining === 0) ? "disabled" : ""}>🏆 รอดครบเวลา</button>
+      </div>
+    `;
+    card.querySelector(".reveal").onclick = () => revealWord(p.id);
+    card.querySelector(".reroll").onclick = () => resetPlayer(p.id);
+    card.querySelector(".start").onclick = () => startPlayer(p.id);
+    card.querySelector(".lose").onclick = () => losePlayer(p.id);
+    card.querySelector(".survived").onclick = () => survivePlayer(p.id);
+    playersEl.appendChild(card);
+  });
+}
+
+function newGame() {
+  stopTicker();
+  players = [];
+  const count = Number($("playerCount").value);
+  const used = [];
+  for (let i = 1; i <= count; i++) {
+    const word = randomWord(used);
+    used.push(word);
+    players.push({
+      id: ++nextId,
+      number: i,
+      word,
+      state: "ready",
+      remaining: 300,
+      revealed: false
+    });
+  }
+  message.style.display = "block";
+  message.textContent = "เกมใหม่พร้อมแล้ว! ให้แต่ละคนกด “ดูคำ” ทีละคน อย่าแอบดูคำของเพื่อน 🤫";
+  renderPlayers();
+}
+
+$("newGame").addEventListener("click", newGame);
+$("wordMode").addEventListener("change", () => {
+  message.style.display = "block";
+  message.textContent = "เปลี่ยนหมวดคำแล้ว กด “เริ่มเกมใหม่ / สุ่มคำใหม่” เพื่อใช้หมวดนี้";
 });
-$("reveal").onclick=()=>{
- shown=!shown;
- $("word").textContent=shown?word:"••••••";
- $("reveal").textContent=shown?"🙈 ซ่อนคำ":"👁 แสดงคำ";
- $("hint").textContent=shown?"จำคำไว้ แล้วซ่อนก่อนส่งมือถือ":"ให้เจ้าของคำดูคนเดียว";
-};
-$("newword").onclick=newWord;
-$("start").onclick=start;
-$("pause").onclick=()=>{
- stop();$("start").disabled=false;$("pause").disabled=true;
- $("status").textContent="หยุดชั่วคราว";
-};
-$("reset").onclick=()=>{
- stop();remaining=300;showTime();
- $("start").disabled=false;$("pause").disabled=true;
- $("lose").disabled=true;$("win").disabled=true;
- $("status").textContent="พร้อมเริ่มเกม";$("result").textContent="";
-};
-$("lose").onclick=()=>{
- stop();$("start").disabled=true;$("pause").disabled=true;
- $("lose").disabled=true;$("win").disabled=true;
- $("result").textContent="💥 พูดคำต้องห้ามแล้ว! แพ้รอบนี้";
- penaltyEnd=Date.now()+300000;
- $("status").textContent="เวลาลงโทษ 05:00";
- if(penalty)clearInterval(penalty);
- penalty=setInterval(()=>{
-  const left=Math.max(0,Math.ceil((penaltyEnd-Date.now())/1000));
-  $("status").textContent="เวลาลงโทษ "+String(Math.floor(left/60)).padStart(2,"0")+":"+String(left%60).padStart(2,"0");
-  if(left<=0){
-   clearInterval(penalty);penalty=null;
-   $("status").textContent="ครบโทษ 5 นาทีแล้ว";
-   $("start").disabled=false;
-  }
- },250);
-};
-$("win").onclick=()=>{
- stop();$("start").disabled=false;$("pause").disabled=true;
- $("lose").disabled=true;$("win").disabled=true;
- $("status").textContent="ผู้เล่น "+player+" รอดครบเวลา";
- $("result").textContent="🏆 รอดครบเวลา! จบรอบแล้ว";
-};
-newWord();showTime();
+newGame();
 </script>
 </body>
 </html>
